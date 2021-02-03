@@ -34,20 +34,20 @@ class Mariadb
 	}
 	public static function CheckTableExisting()
 	{
-
-		$r = Mariadb::DoQuery("show tables");
-		if(!isset($r[0]['Tables_in_dbname']))
-		{
-			$q = "CREATE TABLE adress_str
-			(
-				id INT NOT NULL AUTO_INCREMENT,
-				full_adress VARCHAR(1024) NOT NULL,
-				CONSTRAINT adress_pk PRIMARY KEY (id),
-				INDEX full_adress_idx (full_adress)
-			)";
-			Mariadb::DoQuery($q);
-		}
-
+		$q = "CREATE TABLE IF NOT EXIST adress_parts
+		(
+			id INT NOT NULL AUTO_INCREMENT,
+			region_name VARCHAR(256) NOT NULL,
+			city_name VARCHAR(256) NOT NULL,
+			street_name VARCHAR(256) NOT NULL,
+			house_name VARCHAR(256) NOT NULL,
+			CONSTRAINT adress_pk PRIMARY KEY (id),
+			INDEX region_idx (region_name),
+			INDEX city_idx (city_name),
+			INDEX street_idx (street_name),
+			INDEX house_idx (house_name)
+		)";
+		Mariadb::DoQuery($q);
 	}
 	protected function __construct() {
         
