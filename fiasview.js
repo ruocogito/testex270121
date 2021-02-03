@@ -27,7 +27,7 @@ function httpPostAsync(mapToSend)  //, callback
 		try{ var json = JSON.parse(xmlHttp.responseText);}
 		catch (e) { 	console.log(e); 
 		        	return;	    }
-		let funcs = {'filldatalist':FillDataList,'stored':slog,'show':FillShow };
+		let funcs = {'filldatalist':FillDataList,'stored':slog,'show':FillShow,'loh':elog };
 		funcs[json.act](json);
   	}
     }
@@ -40,6 +40,11 @@ function httpPostAsync(mapToSend)  //, callback
 function slog(json)
 {
 	console.log('stored: '+json.stored);
+}
+
+function elog(json)
+{
+	console.log('error on select full adress: '+json.data);
 }
 
 function FillShow(json)
