@@ -9,12 +9,12 @@ class Mariadb
 	{
         	$params = parse_ini_file('mariadb.ini');
 	        if ($params === false)
-		    throw new \Exception("Error reading database configuration file");
+		    throw new Exception("Error reading database configuration file");
         
 
 	        $connection = new mysqli($params['host'],$params['user'],$params['password'],$params['database']);
 	        if($connection->connect_error)
-			throw new \Exception($connection->connect_error);
+			throw new Exception($connection->connect_error);
 
 	        static::$connection=$connection;
 	}
@@ -34,7 +34,7 @@ class Mariadb
 	}
 	public static function CheckTableExisting()
 	{
-		$q = "CREATE TABLE IF NOT EXIST adress_str
+		$q = "CREATE TABLE IF NOT EXISTS adress_str
 		(
 			id INT NOT NULL AUTO_INCREMENT,
 			full_adress VARCHAR(1024) NOT NULL,
