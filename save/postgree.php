@@ -12,7 +12,7 @@ class Postgre
 	{
         	$params = parse_ini_file('postgree.ini');
 	        if ($params === false)
-		    throw new \Exception("Error reading database configuration file");
+		    throw new Exception("Error reading database configuration file");
         
 	        // connect to the postgresql database
         	$conStr = sprintf("pgsql:host=%s;port=%d;dbname=%s;user=%s;password=%s", 
@@ -23,7 +23,7 @@ class Postgre
 	                $params['password']);
 
 	        $pdo = new \PDO($conStr);
-	        $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+	        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 	        static::$pdo=$pdo;
 	}

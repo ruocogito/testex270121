@@ -21,10 +21,6 @@ function ShowAdresses()
 
 function SaveAdress()
 {
-	//43909681-d6e1-432d-b61f-ddac393cb5da
-	//7b6de6a5-86d0-4735-b11a-499081111af8
-	//8ba0131d-84d8-4028-8463-17859512a897       
-	//4a58de5d-9715-41d8-ab98-10944c03d255
 	$q= "select concat(a.formalname,' ',a.shortname) as region_name,
 		    concat(a2.shortname, ' ',a2.formalname) as city_name,
 		    concat(a3.shortname,' ',a3.formalname) as street_name,

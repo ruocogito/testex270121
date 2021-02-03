@@ -9,12 +9,12 @@ class Mariadb
 	{
         	$params = parse_ini_file('mariadb.ini');
 	        if ($params === false)
-		    throw new \Exception("Error reading database configuration file");
+		    throw new Exception("Error reading database configuration file");
         
 
 	        $connection = new mysqli($params['host'],$params['user'],$params['password'],$params['database']);
 	        if($connection->connect_error)
-			throw new \Exception($connection->connect_error);
+			throw new Exception($connection->connect_error);
 
 	        static::$connection=$connection;
 	}
