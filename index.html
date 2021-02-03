@@ -1,0 +1,37 @@
+<html>
+<head>
+<meta charset="utf-8">
+</head>
+<body>
+<script type="text/javascript" src="fiasview.js"></script>
+<link rel="stylesheet" href="fiasview.css">
+<p id='region-error' class='error hide'></p>
+<p id='city-error' class='error hide'></p>
+<p id='street-error' class='error hide'></p>
+<p id='house-error' class='error hide'></p>
+<div class='formrow labels marginbot'>
+<label>Choose region:</label></div>
+<div class='formrow inputs marginbot'>
+<input id='inpRegions' list='regions' onchange="onChangeRegion(this)"></div>
+
+<div class='formrow labels marginbot'>
+<label>city:</label></div>
+<div class='formrow inputs marginbot'>
+<input id='inpCities' list='cities' onchange="onChangeCity(this)"></div>
+
+<div class='formrow labels marginbot'>
+<label>street:</label></div>
+<div class='formrow inputs marginbot'>
+<input id='inpStreets' list='streets' onchange="onChangeStreet(this)"></div>
+<div class='formrow labels'>
+<label>house:</label></div>
+<div class='formrow inputs'>
+<input id='inpHouses' list='houses' onchange="onChangeHouse(this)"></div>
+<div class='formrow labels button'><input class="button" type=button value='save' onclick="OnSave()"></div>
+<div class='formrow inputs button'><input class="button" type=button value='show' onclick="OnShow()"></div>
+<div id='showtable'>
+</div>
+<div id="content">
+</div>
+</body>
+</html>

@@ -1,0 +1,64 @@
+body
+{
+	background-color: #C6D0D5;
+	margin-top: 10%;
+	margin-left: 10%;
+}
+
+div.formrow
+{
+	float: left;
+	width:98px;
+}
+
+div.labels
+{
+	text-align: end;
+	clear:both;
+}
+
+div.inputs
+{
+	margin-left: 10px;
+}
+
+div.marginbot
+{
+	margin-bottom: 10px;
+}
+p.hide
+{
+	display:none;
+}
+div.button
+{
+	width:150px;
+	margin-top:10px;
+}
+div input.button {
+  background-color: #B2BBBF;
+  border: none;
+  color: white;
+  padding: 10px 42px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 17px;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+div#showtable
+{
+ clear:both;
+ background-color: #DCE6EA;
+ width: fit-content;
+}
+div#showtable p
+{
+ padding: 0;
+ margin: 0;
+}
+p.error
+{
+  color: #DD1010;
+}
