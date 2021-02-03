@@ -8,12 +8,14 @@ function prepare()
 	option.id = id; 
 	byid('content').appendChild(option);
  });
- SendAoRequest();
+ SendAoRequest('getregions');
 }
 
-function SendAoRequest()
+function SendAoRequest(act)
 {
+	mapChoiced['act'] = act;
 	httpPostAsync(mapChoiced);	
+	delete mapChoiced.act;
 }
 
 function httpPostAsync(mapToSend)  //, callback
@@ -22,20 +24,11 @@ function httpPostAsync(mapToSend)  //, callback
     xmlHttp.onreadystatechange = function() { 
         if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
 	{
-		try {
- 			var json = JSON.parse(xmlHttp.responseText);
-		    } catch (e) {
-			
-			console.log(e); 
-	        	return;
-		    }
-
-	        if(json.show!=null) FillShow(json.show);
-		else if(json.stored===undefined && json.data!==null && json.id!==null)
-			FillDataList(json.data, json.id);
-		else if(json.stored!==null)
-			console.log('stored: '+json.stored);
-			
+		try{ var json = JSON.parse(xmlHttp.responseText);}
+		catch (e) { 	console.log(e); 
+		        	return;	    }
+		let funcs = {'filldatalist':FillDataList,'stored':slog,'show':FillShow };
+		funcs[json.act](json);
   	}
     }
     xmlHttp.open("POST", 'save/', true); // true for asynchronous 
@@ -44,83 +37,95 @@ function httpPostAsync(mapToSend)  //, callback
     xmlHttp.send(data);
 }
 
-function FillShow(arr)
+function slog(json)
 {
-	var showdiv = byid('showtable');	
-	showdiv.innerHTML = '';	
- arr.forEach(function(adress, i, arr){
-  let p = newelm('p');	
-  p.innerHTML = adress['full_adress'];	
-  showdiv.appendChild(p);
- });
+	console.log('stored: '+json.stored);
 }
 
-function FillDataList(arr, id)
+function FillShow(json)
+{     
+	var arr = json.show;
+	var showdiv = byid('showtable');	
+	showdiv.innerHTML = '';	
+	arr.forEach(function(adress, i, arr){
+		let p = newelm('p');	
+		p.innerHTML = adress['full_adress'];	
+		showdiv.appendChild(p);
+	});
+}
+
+function FillDataList(json)
 {
+	var arr = json.data;
+	var id = json.id;
 
- var dl = byid(id);
-// for (let option of dl.options) 
- //  if(dl!=option) dl.remove(option);
-       dl.innerHTML='';
- arr.forEach(function(mapRegion, i, arr){
-  let option = newelm('option');	
-  option.value = mapRegion['name'];	
-  option.id = mapRegion['guid'];	
-  dl.appendChild(option);
- });
+	var dl = byid(id);
 
+	dl.innerHTML='';
+	arr.forEach(function(mapRegion, i, arr){
+		let option = newelm('option');	
+		option.value = mapRegion['name'];	
+		option.id = mapRegion['guid'];	
+		dl.appendChild(option);
+	});
 }
 
 function byid(id)
 {
- return document.getElementById(id);
+	return document.getElementById(id);
 }
 function newelm(elm)
 {
- return document.createElement(elm);
+	return document.createElement(elm);
 }
 String.prototype.capitalize = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);
 }
+
+function commonProcessOnChange(fOptionCmp,errorid,errormsg,inputobj)
+{
+        var BreakException = {'guid':''};
+	var guid = ''; 
+	try{
+		inputobj.list.childNodes.forEach(fOptionCmp);
+        }catch (e) {
+		if (e.guid===undefined) throw e;
+		guid = e.guid;
+	}
+	if(guid=='')
+	{
+		byid(errorid).className = 'error';
+		byid(errorid).innerHTML = errormsg+inputobj.value;
+		inputobj.value = '';	
+		return false;			
+	}	                    	
+	byid(errorid).className = 'hide';
+	return guid;		             
+	
+}  
+
+function ProcessOnChange(niddleName,errorid,errormsg,inputobj)
+{
+	return commonProcessOnChange( function(option, currentIndex, listObj) {
+		if(option.value.indexOf(niddleName)>-1)
+				throw {'guid':option.id};  },errorid,errormsg,inputobj);
+}
+
+
 function onChangeRegion(inpRegion)
 {
 	var RegionName = inpRegion.value.trim().capitalize(); //first word
 	indexofRType = RegionName.indexOf(' '); //if two word exist cut them
 	if(indexofRType>=0) RegionName = RegionName.substring(0,indexofRType+1).trim();
 
-	var BreakException = {'guid':''};
-	var region_guid = ''; 
-	try{
-	inpRegion.list.childNodes.forEach(
-	  function(option, currentIndex, listObj) {
-		if(option.value.indexOf(RegionName)>-1)
-		{
-			//global region_guid = option.id;
-			throw {'guid':option.id};
-		}
-	  });
-        }catch (e) {
-	if (e.guid===undefined) throw e;
-	region_guid = e.guid;
-	}
-	if(region_guid=='')
-	{
-		byid('region-error').className = 'error';
-		byid('region-error').innerHTML = 'Не найден регион '+inpRegion.value;
-		inpRegion.value = '';	
-			
-	}	                    	
-	else
-	{
-		byid('region-error').className = 'hide';
-		//to do: clear city, street and house
-		byid('inpCities').value='';
-		byid('inpStreets').value='';
-		byid('inpHouses').value='';
-		mapChoiced = {'region':region_guid};
-		SendAoRequest();
-		
-	}
+        guid = ProcessOnChange(RegionName,'region-error','Не найден регион ',inpRegion);
+	if(guid===false) return;
+	
+	byid('inpCities').value='';
+	byid('inpStreets').value='';
+	byid('inpHouses').value='';
+	mapChoiced = {'region':guid};
+	SendAoRequest('getcities');
 }
 
 function onChangeCity(inpCity)
@@ -132,40 +137,17 @@ function onChangeCity(inpCity)
 		CityName = 'г. '+ CityName.substring(1).trim(); //add 1 space or remove excess spaces
 	else CityName = 'г. '+CityName.capitalize();
 
-	var BreakException = {'guid':''};
-	var city_guid = ''; 
-	try{
-		inpCity.list.childNodes.forEach(
-		function(option, currentIndex, listObj) {
-		if(option.value.indexOf(CityName)>-1)
-		{
-			//global region_guid = option.id;
-			throw {'guid':option.id};
-		}
-	  });
-        }catch (e) {
-	if (e.guid===undefined) throw e;
-		city_guid = e.guid;
-	}
-	if(city_guid=='')
-	{
-		byid('city-error').className = 'error';
-		byid('city-error').innerHTML = 'Не найден город '+inpCity.value;
-		city_guid.value = '';	
-			
-	}	                    	
-	else
-	{
-		byid('city-error').className = 'hide';
-		mapChoiced['city'] = city_guid;
-		//clear street and house
-		delete mapChoiced.house;
-		delete mapChoiced.street;
-		byid('inpStreets').value='';
-		byid('inpHouses').value='';
-		SendAoRequest();
+	guid = ProcessOnChange(CityName ,'city-error','Не найден город ',inpCity);
+	if(guid===false) return;	
+	mapChoiced['city'] = guid;
+	//clear street and house
+	delete mapChoiced.house;
+	delete mapChoiced.street;
+	byid('inpStreets').value='';
+	byid('inpHouses').value='';
+	SendAoRequest('getstreets');
 	
-	}
+
 }
 
 function onChangeStreet(inpStreet)
@@ -173,84 +155,34 @@ function onChangeStreet(inpStreet)
 	var StreetName = inpStreet.value.trim();
 	indexofSType = StreetName.indexOf(' '); //if first word exist cut them
 	if(indexofSType>0) StreetName = StreetName.substring(indexofSType).trim();
-
-	var BreakException = {'guid':''};
-	var street_guid = ''; 
-	try{
-	inpStreet.list.childNodes.forEach(
-	  function(option, currentIndex, listObj) {
-		if(option.value.indexOf(StreetName)>-1)
-		{
-			//global region_guid = option.id;
-			throw {'guid':option.id};
-		}
-	  });
-        }catch (e) {
-	if (e.guid===undefined) throw e;
-		street_guid = e.guid;
-	}
-	if(street_guid=='')
-	{
-		byid('street-error').className = 'error';
-		byid('street-error').innerHTML = 'Не найдена улица '+inpStreet.value;
-		inpStreet.value = '';	
-			
-	}	                    	
-	else
-	{
-		byid('street-error').className = 'hide';
-		//house
-		byid('inpHouses').value='';
-		delete mapChoiced.house;
-		mapChoiced['street'] = street_guid;
-		SendAoRequest();
-		
-	}
+	
+	guid = ProcessOnChange(StreetName ,'street-error','Не найдена улица ',inpStreet);
+	if(guid===false) return;	
+	//house
+	byid('inpHouses').value='';
+	delete mapChoiced.house;
+	mapChoiced['street'] = guid;
+	SendAoRequest('gethouses');
 }
 
 function onChangeHouse(inpHouse)
 {
 	var HouseNum = inpHouse.value.trim();
 
-	var BreakException = {'guid':''};
-	var house_guid = ''; 
-	try{
-	inpHouse.list.childNodes.forEach(
-	  function(option, currentIndex, listObj) {
+        guid = commonProcessOnChange(function(option, currentIndex, listObj) {
 		if(option.value.localeCompare(HouseNum, undefined, { sensitivity: 'accent' }) === 0)
-		{
-			throw {'guid':option.id};
-		}
-	  });
-        }catch (e) {
-	if (e.guid===undefined) throw e;
-		house_guid = e.guid;
-	}
-	if(house_guid=='')
-	{
-		byid('house-error').className = 'error';
-		byid('house-error').innerHTML = 'Не найден дом '+inpHouse.value;
-		inpHouse.value = '';	
-			
-	}	                    	
-	else
-	{
-		byid('house-error').className = 'hide';
-		mapChoiced['house'] = house_guid;
-		SendAoRequest();
-	}
+				throw {'guid':option.id};  },'house-error','Не найден дом ',inpHouse);
+	if(guid===false) return;	
+
+	mapChoiced['house'] = guid;
 }
 
 function OnSave()
 {
-	mapChoiced['save'] = true;
-	SendAoRequest();	
-	delete mapChoiced.save;
+	SendAoRequest('save');	
 }
 
 function OnShow()
 {
-	mapChoiced['show'] = true;	
-	SendAoRequest();
-	delete mapChoiced.show;	
+	SendAoRequest('show');
 }

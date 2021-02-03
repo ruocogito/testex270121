@@ -6,31 +6,24 @@
  if ($headers["Content-Type"] == "application/json")
    $_POST = json_decode(file_get_contents("php://input"), true) ?: []; 
 
-if(isset($_POST['show']))
-	echo ShowAdresses();
-else if(!isset($_POST['region']))
-	echo GetRegions();
-else if(!isset($_POST['city']))
-	echo GetCities();
-else if(!isset($_POST['street']))
-	echo GetStreets();
-else if(!isset($_POST['house']))
-	echo GetHouses();
-else if(isset($_POST['save']))
-	echo SaveAdress();
+$funcs = ['getregions'=>'GetRegions','getcities'=>'GetCities','getstreets'=>'GetStreets',
+	  'gethouses'=>'GetHouses','save'=>'SaveAdress','show'=>'ShowAdresses' ];
 
+
+if(isset($funcs[$_POST['act']]))
+	echo $funcs[$_POST['act']]();
 
 function ShowAdresses()
 {
 	$r = Mariadb::DoQuery('select full_adress from adress_str');
-	return json_encode(['show' => $r]);  
+	return json_encode(['act' => 'show','show' => $r]);  
 }
 
 function SaveAdress()
 {
 	//43909681-d6e1-432d-b61f-ddac393cb5da
 	//7b6de6a5-86d0-4735-b11a-499081111af8
-	//8ba0131d-84d8-4028-8463-17859512a897
+	//8ba0131d-84d8-4028-8463-17859512a897       
 	//4a58de5d-9715-41d8-ab98-10944c03d255
 	$q= "select concat(a.formalname,' ',a.shortname,', ',
 			  a2.shortname, ' ',a2.formalname, ', ',
@@ -43,7 +36,7 @@ function SaveAdress()
 	
 	$q = "insert into adress_str(full_adress) values('".$res[0]['full_adress']."')";
 	$r = Mariadb::DoQuery($q);
-	return json_encode(['stored' => $r]);
+	return json_encode(['act' => 'stored', 'stored' => $r]);
 }
 
 function GetRegions()
@@ -51,9 +44,9 @@ function GetRegions()
 
 	$res = Postgre::DoQuery("SELECT aoguid, addrobj.formalname, addrobj.shortname from addrobj where addrobj.aolevel=".Postgre::LV_REGION);
 	$r = [];
-	foreach($res as $row)
+	foreach($res as $row)                      
 		$r[] = ['guid' => $row['aoguid'], 'name' => $row['formalname'].' '.$row['shortname']];
-	return json_encode( ['id' => 'regions','data'=> $r] );
+	return json_encode( ['act' => 'filldatalist', 'id' => 'regions','data'=> $r] );
 }
 
 function GetCities()
@@ -63,7 +56,7 @@ function GetCities()
 	$r = [];
 	foreach($res as $row)
 		$r[] = ['guid' => $row['aoguid'], 'name' => $row['shortname'].'. '.$row['formalname']];
-	return json_encode( ['id' => 'cities','data'=> $r] );
+	return json_encode( ['act' => 'filldatalist', 'id' => 'cities','data'=> $r] );
 }
 
 function GetStreets()
@@ -73,7 +66,7 @@ function GetStreets()
 	$r = [];
 	foreach($res as $row)
 		$r[] = ['guid' => $row['aoguid'], 'name' => $row['shortname'].' '.$row['formalname']];
-	return json_encode( ['id' => 'streets','data'=> $r] );
+	return json_encode( ['act' => 'filldatalist','id' => 'streets','data'=> $r] );
 }
 
 function GetHouses()
@@ -93,7 +86,7 @@ function GetHouses()
 
 		$r[] = ['guid' => $row['houseguid'], 'name' => $name];
 	}
-	return json_encode( ['id' => 'houses','data'=> $r] );
+	return json_encode( ['act' => 'filldatalist','id' => 'houses','data'=> $r] );
 	
 }
 
