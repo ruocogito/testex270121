@@ -34,14 +34,14 @@ class Mariadb
 	}
 	public static function CheckTableExisting()
 	{
-		$q = "CREATE TABLE IF NOT EXIST adress_parts
+		$q = "CREATE TABLE IF NOT EXISTS adress_parts
 		(
 			id INT NOT NULL AUTO_INCREMENT,
 			region_name VARCHAR(256) NOT NULL,
 			city_name VARCHAR(256) NOT NULL,
 			street_name VARCHAR(256) NOT NULL,
 			house_name VARCHAR(256) NOT NULL,
-			CONSTRAINT adress_pk PRIMARY KEY (id),
+			CONSTRAINT adress_parts_pk PRIMARY KEY (id),
 			INDEX region_idx (region_name),
 			INDEX city_idx (city_name),
 			INDEX street_idx (street_name),

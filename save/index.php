@@ -15,7 +15,7 @@ if(isset($funcs[$_POST['act']]))
 
 function ShowAdresses()
 {
-	$r = Mariadb::DoQuery('select concat(region_name,', ',city_name,', ',street_name, ' ',house_name) as full_adress from adress_parts');
+	$r = Mariadb::DoQuery('select concat(region_name,", ",city_name,", ",street_name, " ",house_name) as full_adress from adress_parts');
 	return json_encode(['act' => 'show','show' => $r]);  
 }
 
